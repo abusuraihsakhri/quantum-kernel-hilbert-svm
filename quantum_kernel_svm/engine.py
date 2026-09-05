@@ -4,7 +4,7 @@ Domain: Quantum Machine Learning
 Standard: Havlicek 2019 Quantum Kernel Protocol
 """
 import math
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, Optional
 from .models import FrontierPayload, AgentTelemetryAlert, ExecutionStatus
 
 

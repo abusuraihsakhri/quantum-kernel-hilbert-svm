@@ -1,7 +1,7 @@
 """
 FastAPI REST API Server for Quantum Kernel Hilbert Space Support Vector Machine Agent.
 """
-from typing import Dict, Any
+from typing import Dict
 from .models import FrontierPayload
 from .agents import QuantumKernelCoordinator
 

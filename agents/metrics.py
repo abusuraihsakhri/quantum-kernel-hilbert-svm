@@ -1,7 +1,6 @@
 """
 Prometheus Operational Metrics Exporter for quantum-kernel-hilbert-svm.
 """
-import time
 from typing import Dict, Any
 
 class SystemMetricsCollector:
