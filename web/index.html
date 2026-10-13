@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quantum Kernel Hilbert Svm — Operations Console</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg: #090d16;
@@ -125,51 +124,30 @@
     <div class="header">
         <div class="header-title">
             <h1>Quantum Kernel Hilbert Svm</h1>
-            <p>Domain: Clinical & Cryptographic AI | Standard: CAP / CLSI / NIST Standards | LabMind-Atlas Architecture</p>
+            <p>Noiseless quantum fidelity kernel calculator · Separate legacy threshold assessment</p>
         </div>
-        <div>
-            <span class="badge">Air-Gapped Active</span>
-            <span class="badge" style="background: rgba(16,185,129,0.2); color: #10b981; border-color: #10b981;">Zero-PHI Guard Active</span>
-        </div>
+        <div><span class="badge">Local browser mode · unsigned</span></div>
     </div>
 
-    <div class="metrics-bar">
-        <div class="metric-box">
-            <div class="metric-label">System Status</div>
-            <div class="metric-val" style="color: var(--success);" id="m-status">OPTIMAL</div>
-        </div>
-        <div class="metric-box">
-            <div class="metric-label">Tasks Processed</div>
-            <div class="metric-val" id="m-tasks">142</div>
-        </div>
-        <div class="metric-box">
-            <div class="metric-label">Audit Blocks Signed</div>
-            <div class="metric-val" id="m-audit">142</div>
-        </div>
-        <div class="metric-box">
-            <div class="metric-label">PHI Interceptions</div>
-            <div class="metric-val" style="color: var(--accent);" id="m-phi">0</div>
-        </div>
-    </div>
-
+    <p style="margin-bottom:1.5rem;color:var(--text-muted)">This browser workspace performs local calculations without uploading data. Signed HMAC audit records require the separately hosted FastAPI service; browser previews are not signatures.</p>
     <div class="grid">
         <div class="card">
-            <h2>⚙️ Dispatch Distributed Component Audit</h2>
+            <h2>Threshold Task Assessment (legacy, not an SVM)</h2>
             <div class="form-group">
                 <label>Task / Sample ID</label>
-                <input type="text" id="task_id" value="TASK-2026-LIVE-01">
+                <input type="text" id="task_id" value="TASK-001" maxlength="100">
             </div>
             <div class="form-group">
                 <label>Target Identifier</label>
-                <input type="text" id="target_id" value="SPECIMEN-ALPHA-77">
+                <input type="text" id="target_id" value="TARGET-01" maxlength="100">
             </div>
             <div class="form-group">
                 <label>Primary Measurement / Value</label>
-                <input type="number" id="primary_metric" value="29.4" step="0.1">
+                <input type="number" id="primary_metric" value="29.4" step="any">
             </div>
             <div class="form-group">
                 <label>Secondary Metric / Kinetic Index</label>
-                <input type="number" id="secondary_metric" value="14.8" step="0.1">
+                <input type="number" id="secondary_metric" value="14.8" step="any">
             </div>
             <div class="form-group">
                 <label>Status / Phenotype Descriptor</label>
@@ -178,59 +156,133 @@
             <div class="form-group">
                 <label><input type="checkbox" id="is_critical" checked> Trigger Emergency / Critical Flag</label>
             </div>
-            <button class="btn" onclick="runAudit()">Execute Distributed Component Audit</button>
+            <label style="margin:12px 0"><input type="checkbox" id="useServer"> Use same-origin FastAPI backend (for signed records)</label>
+            <button class="btn" type="button" id="runAudit">Evaluate Task</button>
+            <p id="auditMessage" role="status" aria-live="polite" style="color:var(--warning);margin-top:12px"></p>
         </div>
 
         <div class="card">
-            <h2>📊 Real-Time Consensus Dossier & Audit Log</h2>
-            <div class="terminal" id="outputConsole">// Quantum Kernel Hilbert Svm Operations Console Ready
-// Connection established with Air-Gapped Supervisor
-// Cryptographic HMAC-SHA256 audit ledger loaded.
-// Ready for live task payload dispatch...</div>
+            <h2>Assessment Result</h2>
+            <div class="terminal" id="outputConsole" role="status" aria-live="polite">No task evaluated. Local assessments are unsigned previews.</div>
         </div>
     </div>
-
+    <section class="card" style="margin-top:1.5rem">
+      <h2>Exact Simulated Quantum Fidelity Kernel</h2>
+      <p style="color:var(--text-muted);margin:0 0 1rem">A small noiseless ZZ-phase feature map, evaluated locally. K(x,z) = |&lt;φ(x)|φ(z)&gt;|². Use 1–24 observations, 1–6 real-valued features each. No quantum hardware or trained SVM is used by this browser calculator.</p>
+      <label for="vectors">Feature vectors — CSV (one observation per row, no header)</label>
+      <textarea id="vectors" style="min-height:120px" spellcheck="false">0.1,0.3
+0.2,2.1
+1.7,0.8
+2.4,2.8</textarea>
+      <label for="reps" style="margin-top:12px">Feature map repetitions</label>
+      <select id="reps"><option value="1">1</option><option value="2" selected>2</option><option value="3">3</option><option value="4">4</option></select>
+      <button class="btn" type="button" id="runKernel" style="margin-top:12px">Compute Fidelity Matrix</button>
+      <button class="btn" type="button" id="exportKernel" disabled style="margin-top:8px;background:#34465f">Export Matrix CSV</button>
+      <div id="kernelMessage" role="status" aria-live="polite" style="margin:12px 0;color:var(--warning)"></div>
+      <div class="terminal" id="kernelOutput" tabindex="0" style="height:220px">No matrix computed yet.</div>
+    </section>
     <script>
-        async function runAudit() {
-            const consoleEl = document.getElementById('outputConsole');
-            consoleEl.innerText = "// Dispatching task across specialized workers...
-// Invoking InvariantQCWorker, SafetyEscalationWorker, ProtocolWorker...";
-
-            const payload = {
-                task_id: document.getElementById('task_id').value,
-                target_identifier: document.getElementById('target_id').value,
-                primary_metric: parseFloat(document.getElementById('primary_metric').value),
-                secondary_metric: parseFloat(document.getElementById('secondary_metric').value),
-                status_descriptor: document.getElementById('status_descriptor').value,
-                is_critical_flag: document.getElementById('is_critical').checked
-            };
-
-            try {
-                const res = await fetch('/api/audit', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                const data = await res.json();
-                consoleEl.innerText = JSON.stringify(data, null, 2);
-                document.getElementById('m-tasks').innerText = parseInt(document.getElementById('m-tasks').innerText) + 1;
-                document.getElementById('m-audit').innerText = parseInt(document.getElementById('m-audit').innerText) + 1;
-            } catch (err) {
-                consoleEl.innerText = "// Offline / Simulation Output:\n" + JSON.stringify({
-                    dossier_id: "DOSSIER-SIM-" + Math.floor(Math.random()*10000),
-                    system: "quantum-kernel-hilbert-svm",
-                    domain: "Clinical & Cryptographic AI",
-                    task_id: payload.task_id,
-                    overall_urgency: payload.is_critical_flag ? "CRITICAL_STAT_PANIC" : "ELEVATED_RISK",
-                    integrity_status: "DISCORDANT_ANOMALY",
-                    alerts: [
-                        { worker: "InvariantQCWorker", alert: "Primary metric exceeds upper reference bound" },
-                        { worker: "SafetyEscalationWorker", alert: "Critical emergency interlock flag active" }
-                    ],
-                    audit_hash: "HMAC_SHA256_e83f9a72b941d6c381f9"
-                }, null, 2);
+      'use strict';
+      const el = id => document.getElementById(id);
+      let latestMatrix = null;
+      function parseRows(text) {
+        const lines = text.trim().split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+        if (!lines.length || lines.length > 24) throw Error('Use 1–24 observations.');
+        const rows = lines.map((line, index) => {
+          const cells = line.split(',').map(s => s.trim());
+          if (cells.some(s => !s)) throw Error('Empty cell in row ' + (index + 1));
+          const values = cells.map(Number);
+          if (values.some(v => !Number.isFinite(v))) throw Error('Invalid number in row ' + (index + 1));
+          return values;
+        });
+        const d = rows[0].length;
+        if (d < 1 || d > 6 || rows.some(row => row.length !== d)) throw Error('All rows must have the same 1–6 features.');
+        return rows;
+      }
+      function featureState(x, reps) {
+        const size = 1 << x.length, state = Array.from({length:size}, () => [0,0]);
+        state[0][0] = 1;
+        for (let r=0; r<reps; r++) {
+          for (let bit=0; bit<x.length; bit++) {
+            const mask = 1 << bit;
+            for (let pos=0; pos<size; pos++) if ((pos & mask) === 0) {
+              const a=state[pos].slice(), b=state[pos|mask].slice();
+              state[pos] = [(a[0]+b[0])/Math.SQRT2, (a[1]+b[1])/Math.SQRT2];
+              state[pos|mask] = [(a[0]-b[0])/Math.SQRT2, (a[1]-b[1])/Math.SQRT2];
             }
+          }
+          for (let pos=0; pos<size; pos++) {
+            const z = x.map((_,bit) => (pos & (1<<bit)) === 0 ? 1 : -1);
+            let angle = x.reduce((sum,v,i) => sum + v*z[i], 0);
+            for (let i=0; i<x.length; i++) for (let j=i+1; j<x.length; j++)
+              angle += (Math.PI-x[i])*(Math.PI-x[j])*z[i]*z[j];
+            const c=Math.cos(angle), s=Math.sin(angle), a=state[pos];
+            state[pos] = [a[0]*c-a[1]*s, a[0]*s+a[1]*c];
+          }
         }
+        return state;
+      }
+      function fidelity(a,b) {
+        let re=0, im=0;
+        for (let i=0; i<a.length; i++) {
+          re+=a[i][0]*b[i][0]+a[i][1]*b[i][1];
+          im+=a[i][0]*b[i][1]-a[i][1]*b[i][0];
+        }
+        return Math.max(0,Math.min(1,re*re+im*im));
+      }
+      el('runKernel').addEventListener('click', () => {
+        try {
+          const rows=parseRows(el('vectors').value), reps=Number(el('reps').value);
+          const states=rows.map(x => featureState(x,reps));
+          latestMatrix=states.map(a=>states.map(b=>fidelity(a,b)));
+          el('kernelOutput').textContent=latestMatrix.map(row=>row.map(v=>v.toFixed(6)).join(', ')).join('\n');
+          el('kernelMessage').textContent=rows.length+' × '+rows.length+' kernel computed, '+rows[0].length+' qubits.';
+          el('exportKernel').disabled=false;
+        } catch (error) {
+          latestMatrix=null; el('exportKernel').disabled=true;
+          el('kernelOutput').textContent='No valid matrix.';
+          el('kernelMessage').textContent=error.message;
+        }
+      });
+      el('exportKernel').addEventListener('click', () => {
+        if(!latestMatrix) return;
+        const csv=latestMatrix.map(row=>row.join(',')).join('\n')+'\n';
+        const url=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+        const a=document.createElement('a');a.href=url;a.download='quantum_kernel_matrix.csv';a.click();
+        URL.revokeObjectURL(url);
+      });
+      el('runAudit').addEventListener('click', async () => {
+        const output=el('outputConsole');
+        const p={task_id:el('task_id').value.trim(), target_identifier:el('target_id').value.trim(),
+          primary_metric:Number(el('primary_metric').value),secondary_metric:Number(el('secondary_metric').value),
+          status_descriptor:el('status_descriptor').value,is_critical_flag:el('is_critical').checked};
+        if(!p.task_id || !p.target_identifier || !el('primary_metric').value || !el('secondary_metric').value ||
+           !Number.isFinite(p.primary_metric) || !Number.isFinite(p.secondary_metric)) {
+          el('auditMessage').textContent='Enter identifiers and finite metrics.';return;
+        }
+        try {
+          let result;
+          if(el('useServer').checked) {
+            const res=await fetch('./api/audit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(p)});
+            if(!res.ok) throw Error('Backend returned HTTP '+res.status);
+            result=await res.json();
+            el('auditMessage').textContent='Signed backend dossier received.';
+          } else {
+            const alerts=[];
+            if(p.primary_metric>25) alerts.push('Primary metric > 25');
+            if(p.is_critical_flag || p.secondary_metric>12) alerts.push('Secondary metric > 12 or critical flag set');
+            if(/DISCORDANT|ANOMALY|MUTANT|VIOLATION|FAIL|REJECT/i.test(p.status_descriptor)) alerts.push('Anomaly descriptor');
+            result={mode:'LOCAL_PREVIEW_NOT_SIGNED',task_id:p.task_id,target_identifier:p.target_identifier,
+              overall_urgency:p.is_critical_flag?'CRITICAL_STAT_PANIC':alerts.length?'ELEVATED_RISK':'ROUTINE',
+              total_alerts:alerts.length,alerts,notice:'Local threshold preview; no cryptographic audit record.'};
+            el('auditMessage').textContent='Unsigned local preview computed.';
+          }
+          output.textContent=JSON.stringify(result,null,2);
+        } catch(error) {
+          el('auditMessage').textContent='Request failed: '+error.message;
+          output.textContent='No result. Backend mode requires a running same-origin FastAPI service.';
+        }
+      });
     </script>
 </body>
 </html>
