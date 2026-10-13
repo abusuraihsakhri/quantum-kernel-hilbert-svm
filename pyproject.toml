@@ -33,4 +33,4 @@ Repository = "https://github.com/abusuraihsakhri/quantum-kernel-hilbert-svm.git"
 
 [tool.setuptools]
 packages = ["agents", "quantum_kernel_svm"]
-py-modules = ["enrichment", "simulator"]
+py-modules = ["cli", "enrichment", "simulator"]
