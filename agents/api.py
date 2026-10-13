@@ -14,7 +14,7 @@ supervisor = SystemSupervisor(model_provider="mock")
 
 app = FastAPI(
     title="Quantum Kernel Hilbert Svm API",
-    description="Enterprise Distributed Component Platform (Post-Quantum Cryptography & Hardware Security)",
+    description="Enterprise Distributed Component Platform (Deterministic Threshold Assessment)",
     version="3.0.0-ENTERPRISE",
 )
 
@@ -46,7 +46,7 @@ def home():
 
 @app.get("/health")
 def health():
-    return {"status": "HEALTHY", "service": "quantum-kernel-hilbert-svm", "domain": "Post-Quantum Cryptography & Hardware Security", "standard": "NIST FIPS 203/204/205 / ISO/IEC 17825 Standards", "version": "3.0.0-ENTERPRISE"}
+    return {"status": "HEALTHY", "service": "quantum-kernel-hilbert-svm", "domain": "Deterministic Threshold Assessment", "standard": "Repository-defined threshold rules (not externally validated)", "version": "3.0.0-ENTERPRISE"}
 
 
 @app.get("/metrics")
