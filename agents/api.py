@@ -2,7 +2,10 @@
 FastAPI REST API Server for Quantum Kernel Hilbert Svm.
 """
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+from pathlib import Path
+from fastapi.responses import FileResponse
+from quantum_kernel_svm.kernel import kernel_matrix
 from .base import AuditLogger, PHIGuard, SecurityException
 from .models import SystemTaskPayload
 from .supervisor import SystemSupervisor
@@ -18,6 +21,27 @@ app = FastAPI(
 
 class ChatRequest(BaseModel):
     query: str
+
+
+class KernelRequest(BaseModel):
+    points: list[list[float]] = Field(..., min_length=1, max_length=24)
+    reps: int = Field(default=2, ge=1, le=4)
+
+
+@app.post("/api/kernel")
+def api_kernel(request: KernelRequest):
+    try:
+        return {"kernel_matrix": kernel_matrix(request.points, reps=request.reps)}
+    except (ValueError, TypeError) as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+
+
+@app.get("/")
+def home():
+    index = Path(__file__).resolve().parent.parent / "web" / "index.html"
+    if not index.is_file():
+        raise HTTPException(status_code=404, detail="Browser UI not installed")
+    return FileResponse(index)
 
 
 @app.get("/health")
