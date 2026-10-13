@@ -3,10 +3,12 @@ Command-Line Interface for Quantum Kernel Hilbert Space Support Vector Machine A
 """
 import argparse
 import csv
+import json
 import sys
 from quantum_kernel_svm.validation import parse_boolean
 from .models import FrontierPayload
 from .agents import QuantumKernelCoordinator
+from .kernel import kernel_matrix
 
 coordinator = QuantumKernelCoordinator()
 
@@ -33,12 +35,26 @@ def main(argv=None):
     p_batch.add_argument("-i", "--input", required=True)
     p_batch.add_argument("-o", "--output", default="results.csv")
 
+    # Kernel matrix (no third-party dependencies)
+    p_kernel = subparsers.add_parser("kernel-matrix", help="Calculate an exact simulated quantum fidelity kernel")
+    p_kernel.add_argument("--points", required=True, help="JSON array of real-valued feature vectors (1-6 features)")
+    p_kernel.add_argument("--reps", type=int, default=2, help="Feature-map repetitions (1-4)")
+
     # Serve
     p_serve = subparsers.add_parser("serve", help="Launch FastAPI REST server")
     p_serve.add_argument("--host", default="127.0.0.1")
     p_serve.add_argument("--port", type=int, default=8000)
 
     args = parser.parse_args(argv)
+
+    if args.command == "kernel-matrix":
+        try:
+            points = json.loads(args.points)
+            print(json.dumps({"kernel_matrix": kernel_matrix(points, reps=args.reps)}))
+            return 0
+        except (ValueError, TypeError) as exc:
+            print(f"Invalid kernel input: {exc}", file=sys.stderr)
+            return 2
 
     if args.command == "audit":
         payload = FrontierPayload(
@@ -115,6 +131,9 @@ def main(argv=None):
             if app:
                 print(f"Starting Quantum Kernel Hilbert Space Support Vector Machine Agent on http://{args.host}:{args.port}")
                 uvicorn.run(app, host=args.host, port=args.port)
+            else:
+                print("FastAPI / Pydantic not installed", file=sys.stderr)
+                return 1
         except ImportError:
             print("FastAPI / uvicorn not installed. Run 'pip install fastapi uvicorn'")
             return 1
