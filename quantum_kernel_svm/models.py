@@ -1,7 +1,7 @@
 """
 Data Models & Telemetry Definitions for Quantum Kernel Hilbert Space Support Vector Machine Agent.
 Domain: Quantum Machine Learning
-Standard: Havlicek 2019 Quantum Kernel Protocol
+Standard: Repository-defined threshold rules
 """
 import datetime
 import math
@@ -42,7 +42,7 @@ class AgentTelemetryAlert:
     summary: str
     technical_details: str
     actionable_remediation: str
-    standard_reference: str = "Havlicek 2019 Quantum Kernel Protocol"
+    standard_reference: str = "Repository-defined threshold rules"
     timestamp: str = field(default_factory=lambda: datetime.datetime.now(datetime.timezone.utc).isoformat())
 
     def to_dict(self) -> Dict[str, Any]:
