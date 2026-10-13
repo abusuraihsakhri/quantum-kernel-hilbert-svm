@@ -1,9 +1,9 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Quantum Kernel Hilbert Svm API",
-    "description": "Enterprise Distributed Component Platform (Clinical & Cryptographic AI) adhering to CAP / CLSI / NIST Standards.",
-    "version": "3.0.0-ENTERPRISE",
+    "title": "Quantum Kernel SVM and Threshold Assessment API",
+    "description": "Noiseless quantum fidelity kernel endpoint and separate legacy deterministic threshold evaluation. No cryptographic protocol conformance or quantum-hardware claims.",
+    "version": "3.0.0",
     "contact": {
       "name": "Dr. Abu Suraih Sakhri",
       "url": "https://github.com/abusuraihsakhri"
@@ -22,7 +22,7 @@
     },
     "/metrics": {
       "get": {
-        "summary": "Prometheus operational metrics",
+        "summary": "JSON operational counters (not Prometheus exposition format)",
         "responses": {
           "200": {
             "description": "Prometheus text metrics"
@@ -76,7 +76,7 @@
     },
     "/api/chat": {
       "post": {
-        "summary": "Air-gapped supervisory conversational assistant",
+        "summary": "Deterministic mock supervisory response",
         "requestBody": {
           "content": {
             "application/json": {
@@ -107,6 +107,64 @@
         "responses": {
           "200": {
             "description": "Cryptographic audit trail"
+          }
+        }
+      }
+    },
+    "/api/kernel": {
+      "post": {
+        "summary": "Calculate noiseless fidelity Gram matrix for up to 24 feature vectors",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "points": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 24,
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "number"
+                      }
+                    }
+                  },
+                  "reps": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 4,
+                    "default": 2
+                  }
+                },
+                "required": [
+                  "points"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fidelity kernel matrix"
+          },
+          "422": {
+            "description": "Invalid feature vectors"
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "summary": "Browser workspace",
+        "responses": {
+          "200": {
+            "description": "HTML user interface"
+          },
+          "404": {
+            "description": "Browser UI not packaged"
           }
         }
       }

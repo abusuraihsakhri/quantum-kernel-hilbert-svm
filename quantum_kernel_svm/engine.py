@@ -1,7 +1,7 @@
 """
 Core Algorithmic Engine & Cryptographic / Biological Logic for Quantum Kernel Hilbert Space Support Vector Machine Agent.
 Domain: Quantum Machine Learning
-Standard: Havlicek 2019 Quantum Kernel Protocol
+Standard: Repository-defined threshold rules
 """
 import math
 from typing import Any, Dict, Optional
@@ -9,7 +9,7 @@ from .models import FrontierPayload, AgentTelemetryAlert, ExecutionStatus
 
 
 class FrontierDomainEngine:
-    STANDARD = "Havlicek 2019 Quantum Kernel Protocol"
+    STANDARD = "Repository-defined threshold rules"
     PRIMARY_BOUND = 25.0
     SECONDARY_BOUND = 10.0
 
@@ -18,7 +18,7 @@ class FrontierDomainEngine:
         if value > cls.PRIMARY_BOUND:
             return {
                 "summary": "Primary Domain Boundary Deviation",
-                "details": f"Parameter value ({value:.3f}) exceeds operational threshold ({cls.PRIMARY_BOUND:.1f}) under Havlicek 2019 Quantum Kernel Protocol.",
+                "details": f"Parameter value ({value:.3f}) exceeds operational threshold ({cls.PRIMARY_BOUND:.1f}) under Repository-defined threshold rules.",
                 "remediation": "Engage parameter recalibration and algorithmic verification routine.",
             }
         return None
@@ -39,7 +39,7 @@ class FrontierDomainEngine:
         if any(flag in desc_upper for flag in ["VIOLATION", "DISCORDANT", "ANOMALY", "MUTANT", "LEAK"]):
             return {
                 "summary": "Specification / Protocol Anomaly Identified",
-                "details": f"Telemetry status flag '{descriptor}' violates Havlicek 2019 Quantum Kernel Protocol conformance matrix.",
+                "details": f"Telemetry status flag '{descriptor}' violates Repository-defined threshold rules conformance matrix.",
                 "remediation": "Execute automated rollback or secondary consensus verification.",
             }
         return None

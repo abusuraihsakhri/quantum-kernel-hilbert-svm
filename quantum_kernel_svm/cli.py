@@ -3,9 +3,12 @@ Command-Line Interface for Quantum Kernel Hilbert Space Support Vector Machine A
 """
 import argparse
 import csv
+import json
 import sys
+from quantum_kernel_svm.validation import parse_boolean
 from .models import FrontierPayload
 from .agents import QuantumKernelCoordinator
+from .kernel import kernel_matrix
 
 coordinator = QuantumKernelCoordinator()
 
@@ -32,12 +35,26 @@ def main(argv=None):
     p_batch.add_argument("-i", "--input", required=True)
     p_batch.add_argument("-o", "--output", default="results.csv")
 
+    # Kernel matrix (no third-party dependencies)
+    p_kernel = subparsers.add_parser("kernel-matrix", help="Calculate an exact simulated quantum fidelity kernel")
+    p_kernel.add_argument("--points", required=True, help="JSON array of real-valued feature vectors (1-6 features)")
+    p_kernel.add_argument("--reps", type=int, default=2, help="Feature-map repetitions (1-4)")
+
     # Serve
     p_serve = subparsers.add_parser("serve", help="Launch FastAPI REST server")
     p_serve.add_argument("--host", default="127.0.0.1")
     p_serve.add_argument("--port", type=int, default=8000)
 
     args = parser.parse_args(argv)
+
+    if args.command == "kernel-matrix":
+        try:
+            points = json.loads(args.points)
+            print(json.dumps({"kernel_matrix": kernel_matrix(points, reps=args.reps)}))
+            return 0
+        except (ValueError, TypeError) as exc:
+            print(f"Invalid kernel input: {exc}", file=sys.stderr)
+            return 2
 
     if args.command == "audit":
         payload = FrontierPayload(
@@ -80,24 +97,29 @@ def main(argv=None):
             print(f"Error: Permission denied reading '{args.input}'.", file=sys.stderr)
             return 1
 
-        out_fields = fieldnames + ["overall_status", "total_alerts", "critical_count", "consensus_summary"]
+        out_fields = list(dict.fromkeys(fieldnames + ["overall_status", "total_alerts", "critical_count", "consensus_summary"]))
         out_rows = []
-        for r in rows:
-            payload = FrontierPayload(
-                task_id=r.get("task_id", "TASK-01"),
-                target_identifier=r.get("target_identifier", "TARGET-01"),
-                primary_metric=float(r.get("primary_metric", 15.0)),
-                secondary_metric=float(r.get("secondary_metric", 5.0)),
-                status_descriptor=r.get("status_descriptor", "NOMINAL"),
-                is_critical_flag=bool(r.get("is_critical_flag", False)),
-            )
-            dossier = coordinator.process(payload)
-            row_dict = dict(r)
-            row_dict["overall_status"] = dossier["overall_status"]
-            row_dict["total_alerts"] = dossier["total_alerts"]
-            row_dict["critical_count"] = dossier["critical_count"]
-            row_dict["consensus_summary"] = dossier["consensus_summary"]
-            out_rows.append(row_dict)
+        for line_number, r in enumerate(rows, start=2):
+            try:
+                payload = FrontierPayload(
+                    task_id=r.get("task_id", "TASK-01"),
+                    target_identifier=r.get("target_identifier", "TARGET-01"),
+                    primary_metric=float(r.get("primary_metric", 15.0)),
+                    secondary_metric=float(r.get("secondary_metric", 5.0)),
+                    status_descriptor=r.get("status_descriptor", "NOMINAL"),
+                    is_critical_flag=parse_boolean(r.get("is_critical_flag", False)),
+                )
+                dossier = coordinator.process(payload)
+                row_dict = dict(r)
+                row_dict["overall_status"] = dossier["overall_status"]
+                row_dict["total_alerts"] = dossier["total_alerts"]
+                row_dict["critical_count"] = dossier["critical_count"]
+                row_dict["consensus_summary"] = dossier["consensus_summary"]
+                out_rows.append(row_dict)
+
+            except (ValueError, TypeError) as exc:
+                print(f"Error in CSV row {line_number}: {exc}", file=sys.stderr)
+                return 2
 
         with open(args.output, mode="w", encoding="utf-8", newline="") as f:
             writer = csv.DictWriter(f, fieldnames=out_fields)
@@ -114,6 +136,9 @@ def main(argv=None):
             if app:
                 print(f"Starting Quantum Kernel Hilbert Space Support Vector Machine Agent on http://{args.host}:{args.port}")
                 uvicorn.run(app, host=args.host, port=args.port)
+            else:
+                print("FastAPI / Pydantic not installed", file=sys.stderr)
+                return 1
         except ImportError:
             print("FastAPI / uvicorn not installed. Run 'pip install fastapi uvicorn'")
             return 1

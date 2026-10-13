@@ -93,7 +93,7 @@ class QuantumKernelCoordinator:
             "critical_count": crit_count,
             "warning_count": warn_count,
             "alerts": [a.to_dict() for a in all_alerts],
-            "standard_specification": "Havlicek 2019 Quantum Kernel Protocol",
+            "standard_specification": "Repository-defined threshold rules",
             "consensus_summary": f"Consensus evaluation completed across 3 sub-agents with status [{status.value}].",
         }
 
@@ -105,6 +105,6 @@ class QuantumKernelCoordinator:
         if "status" in q or "ledger" in q:
             return f"Quantum Kernel Hilbert Space Support Vector Machine Agent currently managing {len(self.execution_ledger)} execution tasks in air-gapped memory."
         elif "standard" in q or "spec" in q:
-            return "Active runtime operating strictly according to Havlicek 2019 Quantum Kernel Protocol specifications."
+            return "The legacy alert path uses repository-defined threshold specifications; it does not verify a quantum protocol."
         else:
-            return f"Quantum Kernel Hilbert Space Support Vector Machine Agent executive coordinator online. Zero-telemetry on-premises surveillance active."
+            return f"Quantum Kernel Hilbert Space Support Vector Machine Agent executive coordinator online. This is a deterministic mock response, not quantum-hardware monitoring."

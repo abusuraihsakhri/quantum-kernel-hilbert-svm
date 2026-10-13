@@ -1,9 +1,9 @@
 """
 Supervisor Orchestrator & Operations Intelligence for Quantum Kernel Hilbert Svm.
-Domain: Post-Quantum Cryptography & Hardware Security
+Domain: Deterministic Threshold Assessment
 """
 import uuid
-from typing import List
+from typing import Dict, List
 from .base import AuditLogger, PHIGuard
 from .models import SystemTaskPayload, AgentAlert, ConsensusDossier, UrgencyLevel, SystemIntegrityStatus
 from .workers import InvariantQCWorker, SafetyEscalationWorker, ProtocolConformanceWorker
@@ -25,6 +25,7 @@ class SystemSupervisor:
         PHIGuard.assert_no_phi(payload.task_id)
         PHIGuard.assert_no_phi(payload.target_identifier)
         PHIGuard.assert_no_phi(payload.status_descriptor)
+        PHIGuard.assert_no_phi(payload.model_dump_json())
 
         # Multi-worker evaluations
         all_alerts: List[AgentAlert] = []
@@ -75,5 +76,5 @@ class SystemSupervisor:
 
     def query_supervisory_chat(self, query: str) -> str:
         PHIGuard.assert_no_phi(query)
-        prompt = f"Supervisor inquiry for Quantum Kernel Hilbert Svm under NIST FIPS 203/204/205 / ISO/IEC 17825 Standards: {query}"
+        prompt = f"Supervisor inquiry for Quantum Kernel Hilbert Svm under Repository-defined threshold rules (not externally validated): {query}"
         return self.llm.invoke(prompt)

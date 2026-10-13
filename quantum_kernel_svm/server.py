@@ -1,8 +1,9 @@
 """
 FastAPI REST API Server for Quantum Kernel Hilbert Space Support Vector Machine Agent.
 """
-from typing import Dict
+from typing import Dict, List
 from .models import FrontierPayload
+from .kernel import kernel_matrix
 from .agents import QuantumKernelCoordinator
 
 coordinator = QuantumKernelCoordinator()
@@ -11,11 +12,11 @@ coordinator = QuantumKernelCoordinator()
 def create_app():
     try:
         from fastapi import FastAPI
-        from pydantic import BaseModel
+        from pydantic import BaseModel, Field
 
         app = FastAPI(
             title="Quantum Kernel Hilbert Space Support Vector Machine Agent",
-            description="Computes quantum state fidelity kernels K(x, z) = |<phi(x)|phi(z)>|^2 on parameterized feature maps for maximum-margin SVMs.",
+            description="Provides a separate legacy alert workflow and a noiseless simulated quantum fidelity kernel endpoint.",
             version="2.0.0-FRONTIER",
         )
 
@@ -30,6 +31,18 @@ def create_app():
 
         class ChatRequest(BaseModel):
             query: str
+
+        class KernelRequest(BaseModel):
+            points: List[List[float]] = Field(..., min_length=1, max_length=24)
+            reps: int = Field(default=2, ge=1, le=4)
+
+        @app.post("/api/kernel")
+        def api_kernel(req: KernelRequest):
+            from fastapi import HTTPException
+            try:
+                return {"kernel_matrix": kernel_matrix(req.points, reps=req.reps)}
+            except (ValueError, TypeError) as exc:
+                raise HTTPException(status_code=422, detail=str(exc))
 
         @app.get("/health")
         def health():
