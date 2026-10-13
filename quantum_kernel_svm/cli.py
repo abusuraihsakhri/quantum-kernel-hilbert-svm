@@ -99,22 +99,27 @@ def main(argv=None):
 
         out_fields = list(dict.fromkeys(fieldnames + ["overall_status", "total_alerts", "critical_count", "consensus_summary"]))
         out_rows = []
-        for r in rows:
-            payload = FrontierPayload(
-                task_id=r.get("task_id", "TASK-01"),
-                target_identifier=r.get("target_identifier", "TARGET-01"),
-                primary_metric=float(r.get("primary_metric", 15.0)),
-                secondary_metric=float(r.get("secondary_metric", 5.0)),
-                status_descriptor=r.get("status_descriptor", "NOMINAL"),
-                is_critical_flag=parse_boolean(r.get("is_critical_flag", False)),
-            )
-            dossier = coordinator.process(payload)
-            row_dict = dict(r)
-            row_dict["overall_status"] = dossier["overall_status"]
-            row_dict["total_alerts"] = dossier["total_alerts"]
-            row_dict["critical_count"] = dossier["critical_count"]
-            row_dict["consensus_summary"] = dossier["consensus_summary"]
-            out_rows.append(row_dict)
+        for line_number, r in enumerate(rows, start=2):
+            try:
+                payload = FrontierPayload(
+                    task_id=r.get("task_id", "TASK-01"),
+                    target_identifier=r.get("target_identifier", "TARGET-01"),
+                    primary_metric=float(r.get("primary_metric", 15.0)),
+                    secondary_metric=float(r.get("secondary_metric", 5.0)),
+                    status_descriptor=r.get("status_descriptor", "NOMINAL"),
+                    is_critical_flag=parse_boolean(r.get("is_critical_flag", False)),
+                )
+                dossier = coordinator.process(payload)
+                row_dict = dict(r)
+                row_dict["overall_status"] = dossier["overall_status"]
+                row_dict["total_alerts"] = dossier["total_alerts"]
+                row_dict["critical_count"] = dossier["critical_count"]
+                row_dict["consensus_summary"] = dossier["consensus_summary"]
+                out_rows.append(row_dict)
+
+            except (ValueError, TypeError) as exc:
+                print(f"Error in CSV row {line_number}: {exc}", file=sys.stderr)
+                return 2
 
         with open(args.output, mode="w", encoding="utf-8", newline="") as f:
             writer = csv.DictWriter(f, fieldnames=out_fields)
