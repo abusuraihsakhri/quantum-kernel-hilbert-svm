@@ -94,22 +94,27 @@ def main(argv=None):
 
         out_fields = list(dict.fromkeys(fieldnames + ["overall_urgency", "integrity_status", "total_alerts", "audit_hash"]))
         out_rows = []
-        for r in rows:
-            payload = SystemTaskPayload(
-                task_id=r.get("task_id", "TASK-01"),
-                target_identifier=r.get("target_identifier", "TARGET-01"),
-                primary_metric=float(r.get("primary_metric", 15.0)),
-                secondary_metric=float(r.get("secondary_metric", 5.0)),
-                status_descriptor=r.get("status_descriptor", "NOMINAL"),
-                is_critical_flag=parse_boolean(r.get("is_critical_flag", False)),
-            )
-            dossier = supervisor.process_task(payload)
-            row_dict = dict(r)
-            row_dict["overall_urgency"] = dossier.overall_urgency.value
-            row_dict["integrity_status"] = dossier.integrity_status.value
-            row_dict["total_alerts"] = dossier.total_alerts
-            row_dict["audit_hash"] = dossier.audit_hash
-            out_rows.append(row_dict)
+        for line_number, r in enumerate(rows, start=2):
+            try:
+                payload = SystemTaskPayload(
+                    task_id=r.get("task_id", "TASK-01"),
+                    target_identifier=r.get("target_identifier", "TARGET-01"),
+                    primary_metric=float(r.get("primary_metric", 15.0)),
+                    secondary_metric=float(r.get("secondary_metric", 5.0)),
+                    status_descriptor=r.get("status_descriptor", "NOMINAL"),
+                    is_critical_flag=parse_boolean(r.get("is_critical_flag", False)),
+                )
+                dossier = supervisor.process_task(payload)
+                row_dict = dict(r)
+                row_dict["overall_urgency"] = dossier.overall_urgency.value
+                row_dict["integrity_status"] = dossier.integrity_status.value
+                row_dict["total_alerts"] = dossier.total_alerts
+                row_dict["audit_hash"] = dossier.audit_hash
+                out_rows.append(row_dict)
+
+            except (ValueError, TypeError) as exc:
+                print(f"Error in CSV row {line_number}: {exc}", file=sys.stderr)
+                return 2
 
         with open(args.output, mode="w", encoding="utf-8", newline="") as f:
             writer = csv.DictWriter(f, fieldnames=out_fields)
