@@ -1,6 +1,6 @@
 """
 Supervisor Orchestrator & Operations Intelligence for Quantum Kernel Hilbert Svm.
-Domain: Post-Quantum Cryptography & Hardware Security
+Domain: Deterministic Threshold Assessment
 """
 import uuid
 from typing import Dict, List
@@ -76,5 +76,5 @@ class SystemSupervisor:
 
     def query_supervisory_chat(self, query: str) -> str:
         PHIGuard.assert_no_phi(query)
-        prompt = f"Supervisor inquiry for Quantum Kernel Hilbert Svm under NIST FIPS 203/204/205 / ISO/IEC 17825 Standards: {query}"
+        prompt = f"Supervisor inquiry for Quantum Kernel Hilbert Svm under Repository-defined threshold rules (not externally validated): {query}"
         return self.llm.invoke(prompt)
