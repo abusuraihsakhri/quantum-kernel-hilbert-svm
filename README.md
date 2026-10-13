@@ -1,195 +1,96 @@
-# Quantum Kernel Hilbert Svm
+# Quantum Kernel Hilbert SVM
 
-> **Domain:** Post-Quantum Cryptography & Quantum Machine Learning
-> **Standards:** NIST FIPS 203/204/205, ISO/IEC 17825, Havlicek 2019 Quantum Kernel Protocol
+A small **noiseless quantum-kernel simulator and SVM adapter**, with a separate legacy threshold-assessment service. The quantum component computes the fidelity kernel K(x, z) = |⟨φ(x)|φ(z)⟩|² using a data-dependent H/ZZ feature map and optionally trains an SVM via scikit-learn's precomputed-kernel interface.
 
-<div align="center">
+The classical statevector simulator is **Havlíček-inspired**, not an implementation validated against any quantum-hardware protocol. It does not demonstrate quantum advantage. The threshold-assessment agents are deterministic rules, **not SVM predictions** and not implementations of NIST cryptographic standards.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-3776AB.svg?logo=python&logoColor=white)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.111-009688.svg?logo=fastapi&logoColor=white)
-![Audit Trail](https://img.shields.io/badge/Audit-HMAC--SHA256_Tamper--Evident-brightgreen.svg)
-![Zero-PHI Guard](https://img.shields.io/badge/Guard-Zero--PHI_Outbound-blue.svg)
-![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg?logo=docker&logoColor=white)
+## Features
 
-</div>
+- Statevector features for 1–6 qubits, 1–4 repetitions; symmetric, positive-semidefinite Gram matrices
+- Optional scikit-learn SVM training, prediction and scoring using a precomputed fidelity kernel
+- Browser workspace: calculate and export a kernel matrix, and evaluate an explicitly **unsigned** local preview of legacy threshold rules
+- Legacy Python CLI, CSV batch assessment, FastAPI endpoints, in-memory HMAC-chained audit records, and configurable audit key
+- Automated validation and mathematical-invariant tests
 
----
+## Browser workspace
 
-## 📖 What It Does
+Open [`web/index.html`](web/index.html) in a browser to perform local, noiseless kernel calculations without installing Python or uploading data. Choose feature vectors (CSV without a header), repetitions, and **Compute Fidelity Matrix**. You can export the resulting matrix as CSV.
 
-Quantum Kernel Hilbert Svm is an enterprise-grade analytical platform that orchestrates multi-agent evaluation of task payloads through specialized worker agents. The system classifies operational parameters into risk tiers (ROUTINE, ELEVATED, CRITICAL) using deterministic threshold logic, and maintains a cryptographically tamper-evident HMAC-SHA256 audit trail for every evaluation.
+The browser's separate threshold assessment works locally unless **Use same-origin FastAPI backend** is selected. Browser-only results do not carry cryptographic signatures. No browser storage or remote processing is used by the local mode. The browser version is written in JavaScript; Python is **not** executed in the browser.
 
-The platform provides two parallel agent systems:
-- **Primary System** (`agents/`): Multi-worker evaluation with PHI outbound guarding and Bayesian calibration
-- **Quantum Kernel SVM System** (`quantum_kernel_svm/`): Havlicek-protocol-based quantum kernel evaluation with feature map agents
+A GitHub Pages deployment workflow is included, but the live URL should not be considered active until GitHub Pages is enabled and deployment verified.
 
----
+## Install and run
 
-## ⚙️ Key Capabilities & Algorithmic Modules
-
-- **Deterministic Calculation Engine**: Strict compliance with standard reference formulations and thresholds.
-- **Risk & Urgency Classification**: Multi-tier categorization with automated operational action recommendations.
-- **Validation & Guardrails**: Rigorous input bounds checking and anomaly detection.
-- **PHI Outbound Guard**: AST and regex inspection blocking SSNs, MRNs, phone numbers, and patient identifiers.
-- **HMAC-SHA256 Audit Trail**: Chained, cryptographically signed logs for every evaluation and state transition.
-- **FastAPI REST API**: OpenAPI 3.1 endpoints for programmatic access.
-- **Prometheus Telemetry**: Operational metrics export (`/metrics`).
-
----
-
-## 💻 Installation
+Requires Python 3.10–3.12 for the tested CI configurations; package metadata permits Python >=3.9.
 
 ```bash
-# Clone the repository
-git clone https://github.com/abusuraihsakhri/quantum-kernel-hilbert-svm.git
-cd quantum-kernel-hilbert-svm
-
-# Install dependencies
-pip install -e ".[dev]"
-
-# Or install runtime dependencies only
-pip install fastapi uvicorn pydantic pytest
+python -m pip install -e ".[api,ml,dev]"
+pytest -q
 ```
 
----
+Compute a fidelity Gram matrix using the installed command (no optional scientific packages required for kernel evaluation):
 
-## 🚀 CLI Quickstart & Usage
-
-### 1. Run Single Task Evaluation
 ```bash
-python cli.py audit --task-id TASK-001 --target KEY-01 --primary 28.5 --secondary 14.2 --critical --status DISCORDANT
+quantum-kernel-hilbert-svm kernel-matrix --points '[[0.1,0.3],[0.2,2.1],[1.7,0.8]]' --reps 2
 ```
 
-### 2. Interactive Chat Query
-```bash
-python cli.py chat "What is the system status?"
+Use the SVM adapter in Python:
+
+```python
+from quantum_kernel_svm.kernel import QuantumKernelSVM, kernel_matrix
+
+X = [[0.2, 0.2], [2.8, 2.8], [0.2, 2.8], [2.8, 0.2]]
+y = [-1, -1, 1, 1]
+model = QuantumKernelSVM(C=10).fit(X, y)
+print(kernel_matrix(X))
+print(model.predict(X))
 ```
 
-### 3. Batch Process CSV Records
+The SVM adapter requires the optional `ml` extra. Keep training and test data separate when evaluating predictive performance; examples are not benchmarks.
+
+## Legacy threshold evaluation
+
+The original deterministic task assessments remain available. Their thresholds are arbitrary repository settings, not validated scientific or clinical limits.
+
 ```bash
+python cli.py audit --task-id TASK-001 --target TARGET-01 --primary 28.5 --secondary 14.2 --status DISCORDANT
 python cli.py batch -i sample.csv -o results.csv
-```
-
-### 4. Verify Audit Trail Integrity
-```bash
 python cli.py verify-audit
-```
-
-### 5. Launch FastAPI REST Server
-```bash
 python cli.py serve --host 127.0.0.1 --port 8000
 ```
 
-### Parameter Reference
-- `--task-id`: Unique task identifier (default: TASK-2026-001)
-- `--target`: Target entity identifier (default: KEY-TARGET-01)
-- `--primary`: Primary measurement value (float, default: 28.5)
-- `--secondary`: Secondary measurement value (float, default: 14.2)
-- `--critical`: Flag for emergency escalation (boolean)
-- `--status`: Status descriptor (default: DISCORDANT)
+The API provides `GET /` (browser interface), `GET /health`, `POST /api/kernel`, `POST /api/audit`, `POST /api/chat`, `GET /api/audit/logs`, and `GET /metrics` (a JSON summary, **not** Prometheus exposition text).
 
-### Input Data Schema
-
-| Field | Description | Requirement |
-|:------|:------------|:------------|
-| `task_id` | Unique task identifier | Required |
-| `target_identifier` | Target entity identifier | Required |
-| `primary_metric` | Primary measurement value | Required |
-| `secondary_metric` | Secondary measurement value | Optional |
-| `is_critical_flag` | Emergency escalation flag | Optional |
-| `status_descriptor` | Status code descriptor | Optional |
-
----
-
-## 🛡️ Security & Enterprise Architecture
-
-* **Zero-PHI Outbound Interceptor:** Active regex inspection blocking SSNs, MRNs, phone numbers, and patient identifiers.
-* **Tamper-Evident HMAC-SHA256 Audit Trail:** Chained, cryptographically signed logs for every evaluation and state transition.
-* **Secure Key Management:** Audit signing keys sourced from environment variables (`AUDIT_SECRET_KEY`) or generated securely at runtime.
-* **FastAPI & Prometheus Telemetry:** Exposes OpenAPI 3.1 REST endpoints and operational Prometheus metrics (`/metrics`).
-
----
-
-## 🧪 Testing & Verification
-
-Run the automated test suite:
+Example kernel API request:
 
 ```bash
-pytest -v
+curl -s http://127.0.0.1:8000/api/kernel -H 'Content-Type: application/json' \
+  -d '{"points":[[0.1,0.3],[0.2,2.1]],"reps":2}'
 ```
 
-Execute high-throughput batch simulation benchmarks:
+## Docker
 
 ```bash
-python simulator.py 1000
+export AUDIT_SECRET_KEY="$(python -c 'import secrets; print(secrets.token_hex(32))')"
+docker compose up --build
 ```
 
-Run with Docker:
+The Compose port binds to `127.0.0.1:8000` by default. Set a strong audit key through the environment; never commit it. For production exposure, add authentication, TLS, persistence, operational limits, and an appropriate security review.
 
-```bash
-docker build -t quantum-kernel-hilbert-svm .
-docker run -p 8000:8000 -e AUDIT_SECRET_KEY=your-secret-key quantum-kernel-hilbert-svm
-```
+## Privacy and limitations
 
----
+- Browser kernel computations and unsigned previews run locally; selecting the FastAPI backend transmits the task to that backend.
+- Do **not** submit patient identifiers or protected health information. The server's regex guard is a best-effort filter, not a HIPAA de-identification system.
+- Audit logs and registry state are held **in memory only**. HMAC verification detects changes to signed record fields but does not constitute persistent, independently anchored audit storage.
+- The legacy mock chat returns template text; it does not call a generative model or conduct scientific verification.
+- Current API routes have no authentication. Use localhost or a trusted, access-controlled deployment.
+- The kernel uses an exact **classical** statevector simulation, not Pyodide, Qiskit or quantum hardware. Memory and computational work grow rapidly with qubit count.
 
-## 🐳 Container Deployment
+## Technology
 
-```bash
-docker-compose up -d
-```
+Python standard library (kernel and legacy agents), Pydantic, optional FastAPI/Uvicorn and scikit-learn; HTML, CSS, and vanilla JavaScript browser workspace; pytest and GitHub Actions. Tested CI Python versions: 3.10, 3.11, 3.12. Modern browsers supporting ES2020+ are recommended.
 
-The service will be available at `http://localhost:8000`.
+## License
 
-API Endpoints:
-- `GET /health` - Health check
-- `POST /api/audit` - Submit task evaluation
-- `POST /api/chat` - Supervisory chat query
-- `GET /api/audit/logs` - Retrieve audit trail
-- `GET /metrics` - Prometheus metrics
-
----
-
-## 📁 Project Structure
-
-```
-quantum-kernel-hilbert-svm/
-├── agents/                      # Primary multi-agent evaluation system
-│   ├── __init__.py
-│   ├── api.py                   # FastAPI REST server
-│   ├── base.py                  # Security, PHI guard, audit trail
-│   ├── learning.py              # Bayesian calibration engine
-│   ├── llm_factory.py           # LLM provider factory
-│   ├── metrics.py               # Prometheus metrics collector
-│   ├── models.py                # Pydantic data models
-│   ├── streamer.py              # WebSocket telemetry streamer
-│   ├── supervisor.py            # Master orchestrator
-│   └── workers.py               # Specialized evaluation workers
-├── quantum_kernel_svm/           # Quantum kernel SVM agent system
-│   ├── __init__.py
-│   ├── agents.py                # Quantum kernel agents
-│   ├── cli.py                   # Quantum kernel CLI
-│   ├── engine.py                # Core algorithmic engine
-│   ├── models.py                # Data models
-│   └── server.py                # FastAPI server factory
-├── tests/                       # Test suite
-│   ├── test_enrichment.py
-│   ├── test_quantum_kernel_hilbert_svm.py
-│   └── test_quantum_kernel_svm.py
-├── web/
-│   └── index.html               # Operations console UI
-├── cli.py                       # Primary CLI entry point
-├── simulator.py                 # High-throughput simulation
-├── enrichment.py                # Enrichment feature suite
-├── pyproject.toml               # Project configuration
-├── Dockerfile                   # Container build
-├── docker-compose.yml           # Container orchestration
-└── sample.csv                   # Sample batch input data
-```
-
----
-
-## 📄 License
-
-MIT License - see [LICENSE](LICENSE) for details.
+[MIT](LICENSE).
