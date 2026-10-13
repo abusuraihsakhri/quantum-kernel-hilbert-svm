@@ -3,7 +3,7 @@ FastAPI REST API Server for Quantum Kernel Hilbert Svm.
 """
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from .base import AuditLogger, PHIGuard
+from .base import AuditLogger, PHIGuard, SecurityException
 from .models import SystemTaskPayload
 from .supervisor import SystemSupervisor
 
@@ -36,7 +36,10 @@ def metrics():
 
 @app.post("/api/audit")
 def api_audit(payload: SystemTaskPayload):
-    dossier = supervisor.process_task(payload)
+    try:
+        dossier = supervisor.process_task(payload)
+    except SecurityException:
+        raise HTTPException(status_code=422, detail="Input includes a potentially sensitive identifier")
     return dossier.to_dict()
 
 
